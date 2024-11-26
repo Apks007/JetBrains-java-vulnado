@@ -1,36 +1,55 @@
-name: SAST Check with Build
+name: SAST Check and Gradle Build
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-  workflow_dispatch:
 jobs:
-  sast:
+  sast-and-build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
+    - name: List repository contents
+      run: ls -R
+    - name: Check Gradle Wrapper files
+      run: |
+        if [ -f "gradlew" ] && [ -f "gradlew.bat" ] && [ -d "gradle/wrapper" ]; then
+          echo "Gradle Wrapper files found."
+        else
+          echo "Gradle Wrapper files are missing."
+          echo "Contents of the current directory:"
+          ls -la
+          echo "Contents of the gradle directory (if it exists):"
+          [ -d "gradle" ] && ls -la gradle || echo "gradle directory not found"
+          exit 1
+        fi
+    - name: Validate Gradle Wrapper
+      uses: gradle/wrapper-validation-action@v1
     - name: Set up JDK 11
       uses: actions/setup-java@v3
       with:
         java-version: '11'
         distribution: 'temurin'
-    
-    - name: Build with Maven
-      run: mvn clean package
-    
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    - name: Ensure gradlew is executable
+      run: chmod +x gradlew
     - name: Create project zip
       run: zip -r project.zip . -x "*.git*"
-    
     - name: Perform SAST Scan
+      id: sast
       run: |
         RESPONSE=$(curl -X POST \
           -H "Client-ID: 123e4567-e89b-12d3-a456-426614174001" \
           -H "Client-Secret: 7a91d1c9-2583-4ef6-8907-7c974f1d6a0e" \
           -F "projectZipFile=@project.zip" \
           -F "applicationId=674066843da24ef64598ca8b" \
-          -F "scanName=SAST Scan from GitHub Actions" \
+          -F "scanName=SAST-vulnado-java-Gradle-from GitHub Actions" \
           -F "language=java" \
           https://appsecops-api.intruceptlabs.com/api/v1/integrations/sast-scans)
         
@@ -44,20 +63,17 @@ jobs:
         
         CAN_PROCEED=$(echo $RESPONSE | jq -r '.canProceed')
         echo "canProceed=$CAN_PROCEED" >> $GITHUB_ENV
-    
     - name: Check SAST result
       if: env.canProceed != 'true'
       run: |
         echo "SAST scan failed. Build cancelled."
         exit 1
-    
-    - name: Rebuild with Maven
+    - name: Build with Gradle
       if: env.canProceed == 'true'
-      run: mvn clean package
-    
+      run: ./gradlew build
     - name: Upload artifact
       if: env.canProceed == 'true'
       uses: actions/upload-artifact@v3
       with:
-        name: sast-project-files
-        path: target/*.jar
+        name: project-files
+        path: project.zip
