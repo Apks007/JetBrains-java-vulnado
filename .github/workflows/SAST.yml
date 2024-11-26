@@ -26,10 +26,10 @@ jobs:
     - name: Perform SAST Scan
       run: |
         RESPONSE=$(curl -X POST \
-          -H "Client-ID: ${{ secrets.INTRUCEPT_CLIENT_ID }}" \
-          -H "Client-Secret: ${{ secrets.INTRUCEPT_CLIENT_SECRET }}" \
+          -H "Client-ID: 123e4567-e89b-12d3-a456-426614174001" \
+          -H "Client-Secret: 7a91d1c9-2583-4ef6-8907-7c974f1d6a0e" \
           -F "projectZipFile=@project.zip" \
-          -F "applicationId=${{ secrets.INTRUCEPT_APPLICATION_ID }}" \
+          -F "applicationId=674066843da24ef64598ca8b" \
           -F "scanName=SAST Scan from GitHub Actions" \
           -F "language=java" \
           https://appsecops-api.intruceptlabs.com/api/v1/integrations/sast-scans)
