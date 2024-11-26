@@ -24,7 +24,7 @@ RESPONSE=$(curl -v -X POST \
   -F "scanName=java-vulnado-SAST Scan from TeamCity" \
   -F "language=java" \
   
-  https://appsecops-api.intruceptlabs.com/api/v1/integrations/performSASTScan)
+https://appsecops-api.intruceptlabs.com/api/v1/integrations/sast-scans)
   
 # Debug: Output the raw response for troubleshooting
 echo "Raw Response: $RESPONSE"
