@@ -8,8 +8,8 @@ RESPONSE=$(curl -X POST \
   -H "Client-Secret: 7a91d1c9-2583-4ef6-8907-7c974f1d6a0e" \
   -F "projectZipFile=@project.zip" \
   -F "applicationId=674066843da24ef64598ca8b" \
-  -F "scanName=New SAST Scan from TeamCity" \
-  -F "language=python" \
+  -F "scanName=vulnado-java-SAST Scan from TeamCity" \
+  -F "language=java" \
   https://appsecops-api.intruceptlabs.com/api/v1/integrations/sast-scans)
 # Use Python to parse and display JSON
 python3 - <<EOF
