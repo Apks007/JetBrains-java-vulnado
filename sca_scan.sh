@@ -23,7 +23,7 @@ RESPONSE=$(curl -X POST \
   -H "Client-Secret: 7a91d1c9-2583-4ef6-8907-7c974f1d6a0e" \
   -F "projectZipFile=@$CURRENT_DIR.zip" \
   -F "applicationId=674066843da24ef64598ca8b" \
-  -F "scanName=java SCA Scan from TeamCity" \
+  -F "scanName=vulnado-java-SCA Scan from TeamCity" \
   -F "language=java" \
   https://appsecops-api.intruceptlabs.com/api/v1/integrations/sca-scans)
 # Use Python to parse and display JSON
